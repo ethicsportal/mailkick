@@ -21,7 +21,7 @@ require_relative "mailkick/version"
 require_relative "mailkick/engine" if defined?(Rails)
 
 module Mailkick
-  mattr_accessor :services, :mount, :process_opt_outs_method, :headers, :confirm_unsubscribe
+  mattr_accessor :services, :mount, :process_opt_outs_method, :headers, :confirm_unsubscribe, :resubscribe_method
   mattr_reader :secret_token
   mattr_writer :message_verifier
   self.services = []

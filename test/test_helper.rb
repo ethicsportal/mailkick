@@ -37,4 +37,14 @@ class Minitest::Test
       Mailkick.confirm_unsubscribe = previous_value
     end
   end
+
+  def with_resubscribe_method(value)
+    previous_value = Mailkick.resubscribe_method
+    begin
+      Mailkick.resubscribe_method = value
+      yield
+    ensure
+      Mailkick.resubscribe_method = previous_value
+    end
+  end
 end

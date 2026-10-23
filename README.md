@@ -89,6 +89,27 @@ To add a confirmation step to prevent issues with scanners, create `config/initi
 Mailkick.confirm_unsubscribe = true
 ```
 
+### Double Opt-In
+
+By default, the resubscribe button restores the subscription immediately. To use your application's confirmation flow instead, configure a callback in `config/initializers/mailkick.rb`:
+
+```ruby
+Mailkick.resubscribe_method = lambda do |subscriber_type:, subscriber_id:, list:|
+  if subscriber_type == "User"
+    user = User.find_by(id: subscriber_id)
+    user&.request_subscription_confirmation(list)
+  end
+
+  Rails.application.routes.url_helpers.pending_subscriptions_path
+end
+```
+
+The callback receives the subscriber type, ID, and list from the verified Mailkick token and must return a path to redirect to. With the callback configured, Mailkick does not create a subscription. It calls the callback only for POST requests; GET requests return to the subscription page without invoking it. CSRF protection remains enabled for POST requests.
+
+The confirmation method and pending page in this example are application-defined. Your application is responsible for sending and verifying confirmation emails, expiring tokens, and limiting repeat requests. Call `user.subscribe(list)` only after confirmation; the callback does not change the model methods. Use the same confirmation flow for your initial signup form.
+
+Unsubscribe links and one-click unsubscribe headers are unchanged. `confirm_unsubscribe` only controls unsubscribe confirmation and does not enable double opt-in.
+
 ## Unsubscribe Headers
 
 One-click unsubscribe headers ([RFC 8058](https://datatracker.ietf.org/doc/html/rfc8058)) are automatically added to emails that call `mailkick_unsubscribe_url`. To disable, create `config/initializers/mailkick.rb` with:

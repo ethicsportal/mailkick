@@ -25,9 +25,21 @@ module Mailkick
     end
 
     def subscribe
-      subscription.first_or_create!
+      path = subscription_path(params[:id])
 
-      redirect_to subscription_path(params[:id])
+      if Mailkick.resubscribe_method
+        if request.post?
+          path = Mailkick.resubscribe_method.call(
+            subscriber_type: @subscriber_type,
+            subscriber_id: @subscriber_id,
+            list: @list
+          )
+        end
+      else
+        subscription.first_or_create!
+      end
+
+      redirect_to path
     end
 
     protected
